@@ -1,3 +1,6 @@
+python app.py index
+python app.py ask "What is the third month like for the course?"
+
 Workload for PHYS 130 Mechanics
 
 People keep asking so: 7 hours a week, plus 3 on lab weeks. That's real time, not optimistic time.

@@ -1,3 +1,6 @@
+python app.py index
+python app.py ask "What percentage of the course is the lecture material?"
+
 CS 210 Data Structures — assessment
 
 Two midterms and a final, all drawn from lecture material rather than the textbook. Midterms are curved, the final is not.

@@ -55,9 +55,9 @@ in at least 4 of 5 tries.
 
 ---
 
-## 4. Something about your chunks
+## 4. Something about your chunks: Chunk sizes with the answer 
 
-<!-- YOU WRITE THIS ONE.
+<!-- YOU WRITE THIS ONE: Chunk size must be more than 100 characters with headings more 30 characters can contain answers.--!>
 
      How would you know if your chunks were the right size? Name something
      countable or observable.
@@ -72,12 +72,12 @@ in at least 4 of 5 tries.
 
 
 **Why this target:**
-
+<!--Chunks are not headings although they have them. If answer is also found in the headings, therefore, the criterion covers both heading and paragraphs for chunks--!>
 
 
 ---
 
-## 5. Your choice
+## 5. Your choice: Minimum time taken to read through the game strategy
 
 <!-- YOU WRITE THIS ONE TOO.
 
@@ -85,12 +85,14 @@ in at least 4 of 5 tries.
      speed, about refusals, about a particular kind of question your corpus
      handles badly, about source attribution being correct rather than merely
      present — anything, as long as it names a number or an observable
-     outcome. -->
+     outcome.
+     
+     The minimum time for reading the board game strategy guide is 3 minutes -->
 
 
 
 **Why this target:**
-
+Reading the board game strategy guide can take more time but one must have finished reading it in 3 minutes following standard reading practices.
 
 
 ---

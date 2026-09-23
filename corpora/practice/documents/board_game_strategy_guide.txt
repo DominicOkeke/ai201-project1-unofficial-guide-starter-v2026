@@ -1,3 +1,7 @@
+python app.py index
+python app.py ask "What is the strategy before passing the first game?"
+
+
 Strategy notes for players past their first game
 
 Nothing here is a rule. It is what tends to be true, and a table that disagrees

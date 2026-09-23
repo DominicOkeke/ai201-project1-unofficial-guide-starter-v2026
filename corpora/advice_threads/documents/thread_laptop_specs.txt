@@ -1,3 +1,7 @@
+python app.py index
+python app.py ask "Would 1TB of SSD be sufficient for CS course computer?"
+
+
 THREAD: How much laptop do I actually need for CS courses?
 
 --- reply 1 (31 votes) ---

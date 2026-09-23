@@ -65,3 +65,32 @@ rather than a number. Treat the default as a starting point, not an answer —
 it was set against the corpora above at their shipped chunk settings, and
 changing the chunking moves the distances underneath it. Measuring it
 yourself is the milestone.
+
+Sample Chunk
+5 Chunks Generated from the New def split_document function with Help Functions: Def _get_max_size_for_text(text: str) and def _split_text_by_paragraphs_and_sentences(text: str) -> list[str]:
+
+======================================================================
+Chunk 1  |  source: board_game_card_list.txt#0  |  produced by: chunker.py::split_documents
+======================================================================
+What's in the cargo deck
+
+======================================================================
+Chunk 2  |  source: board_game_history.txt#0  |  produced by: chunker.py::split_documents
+======================================================================
+About the game
+
+======================================================================
+Chunk 3  |  source: board_game_ports.txt#3  |  produced by: chunker.py::split_documents
+======================================================================
+Selling cargo at a port that accepts it earns two coins. Selling anywhere else earns one.
+
+======================================================================
+Chunk 4  |  source: board_game_setup.txt#3  |  produced by: chunker.py::split_documents
+======================================================================
+Shuffle the cargo deck and deal four cards face up to the market row.
+
+======================================================================
+Chunk 5  |  source: board_game_strategy_guide.txt#35  |  produced by: chunker.py::split_documents
+======================================================================
+If you are choosing between one more sale and one
+more delivery, deliver.
