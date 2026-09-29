@@ -390,20 +390,29 @@ AI was used as a collaborative partner during development to refine code design,
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 0/5 | 0/5 | 0/5 | MISSED |
+| 4. Chunk sizes with the answer |5 of 5 |0/5|0/5|0/5|MISSED |
+| 5.Minimum time taken to read strategy |5 of 5 |5/5 |5/5 |5/5 |MET|
 
 **Did it help?**
+ No — the change backfired and made overall system performance worse.**
 
+While implementing Hybrid Search successfully improved semantic retrieval for abstract concept queries (resolving Question 3 and raising Criterion 1 from 4/5 to 5/5), assigning a static fallback distance of 0.450 to pure BM25 hits severely compromised the relevance gate. Because 0.450 falls below the 0.60 relevance cutoff threshold, the gate allowed 100% of out-of-scope test questions through, causing Criterion 3 performance to drop catastrophically from 5/5 (MET) to 0/5 (MISSED).
 <!-- Say plainly whether it did, and how you know. If it made things worse,
      say that — a change that backfired, honestly reported, earns full credit
      and is more interesting than one that worked. What matters is that you can
      tell.
 
      Milestone 4. -->
+
+The change backfired and made performance worse.
+
+How We Know:
+The Positive Impact: Integrating Hybrid Search (BM25 + Dense Vectors) successfully resolved Question 3 ("Once you have contracts open, what matters more than price?"), bringing Criterion 1 (Retrieved chunk contains answer) from 4/5 up to 5/5.
+
+The Backfire (Regression): To handle pure BM25 keyword matches, non-vector results were assigned a fixed fallback distance of 0.450. Because 0.450 is lower than your system's 0.60 relevance gate threshold, the gate incorrectly classified all out-of-scope questions (e.g., "What is the capital of Mongolia?") as relevant in-corpus queries. As a result, Criterion 3 (Gate stops out-of-corpus questions) collapsed from 5/5 down to 0/5.
 
 ## What's Still Broken
 
@@ -414,6 +423,19 @@ AI was used as a collaborative partner during development to refine code design,
      not.
 
      Milestone 5. -->
+### 1. Criterion 3: Relevance Gate Calibration (Regression)
+* **Status:** MISSED (0/5)
+* **Root Cause:** Introducing Hybrid Search assigned a fixed fallback distance of `0.450` to non-vector / pure BM25 keyword matches. Because `0.450` is lower than the `0.60` relevance gate cutoff threshold, out-of-corpus queries (e.g., *"What is the capital of Mongolia?"*) were incorrectly classified as relevant, letting 100% of out-of-scope questions bypass the gate.
+
+### 2. Criterion 4: Isolated Header Chunks (<100 Characters)
+* **Status:** MISSED (0/5)
+* **Root Cause:** The splitting logic in `chunker.py` isolates structural document headers (e.g., `"About the game"`, 14 chars) into standalone chunks whenever line breaks occur.
+*
+* **Why Stopped:** Scope was restricted to testing a single pipeline improvement during Milestone 4.
+
+---
+
+* **Why Stopped:** Milestone 4 focused on measuring a single targeted change (Hybrid Search implementation). Fixing the resulting distance calibration side effect requires a second iteration pass.
 
 ## What I'd Do Differently
 
@@ -421,3 +443,31 @@ AI was used as a collaborative partner during development to refine code design,
      differently, and why?
 
      Milestone 5. -->
+
+In the next unit, I would rewrite **Criterion 3 (Relevance Gate)** to measure relative distance margins rather than relying on a hardcoded absolute cutoff threshold like `0.60`. Testing against fixed distance cutoffs breaks easily when switching retrieval architectures (such as moving from pure dense vectors to hybrid sparse/dense RRF scoring). A threshold tied to the distance gap between top-1 and top-5 results would be much more robust across model and search changes.
+
+* **Proposed Fix:** Re-calibrate the BM25 fallback distance in `store.py` from `0.450` to `0.850` (or dynamically weight RRF scores into a normalized distance between `0.0` and `1.0`) so ungrounded keyword hits fail the `0.60` cutoff gate.
+
+ **Proposed Fix:** Update `chunker.py` to enforce a minimum chunk length threshold (e.g., merging any chunk under 100 characters into the subsequent paragraph chunk).
+
+
+
+
+
+
+
+
+
+
+Milestone 2/3 vs. Milestone 4 ("After") Comparison
+Your Hybrid Search implementation changed how distances are assigned to chunks. Pure BM25 hits are assigned a fallback distance of 0.450.
+
+Because your relevance gate threshold is configured at 0.60, assigning a default distance of 0.450 to out-of-scope queries caused a catastrophic regression on Criterion 3.
+
+Side-by-Side Comparison:
+Criterion,Target,Before Fix (Milestone 2/3),After Fix (Hybrid Search),Verdict Change
+1. Retrieved chunk contains answer,4 of 5,4/5 (Failed Q3),5/5 (Distances lowered across all 5 Qs),IMPROVED
+2. Every answer names a source,5 of 5,5/5,5/5,UNCHANGED
+3. Gate stops out-of-corpus questions,4 of 5,5/5 (Refused all 5 with dist 0.72–0.84),0/5 (Let all 5 through with dist 0.450),FAILED (REGRESSION)
+4. Chunk sizes with the answer,5 of 5,0/5 (Header chunks <100 chars),0/5 (Shortest chunk still 10 chars),UNCHANGED
+5. Minimum time taken to read strategy,5 of 5,5/5,5/5,UNCHANGED
