@@ -20,10 +20,10 @@ happened into your run log — that's the evidence for criterion 3.
 Swap them for your own if you like. Keep five of them either way: criterion 3
 names a target of "4 of 5", and four of three is not a thing.
 """
-
-QUESTIONS = [ corpora/practice/documents/board_game_strategy_guide.txt
+## corpora/practice/documents/board_game_strategy_guide.txt
+QUESTIONS = [
     # {"question": "...", "expects": "..."},
-    {"question": "Is there a strategy note past the first game?", "expects": "Yes"},
+    {"question": "Is there a strategy note past the first game?", "expects": "Yes, there is."},
     {"question": "By how much does most new players sail?", "expects": "Too much"},
     {"question": "Once you have contracts open, what matters more than price?", "expects": "Routing plan"},
     {"question": "What is the constraint in the early game rather than position?", "expects": "Cargo"},
