@@ -94,3 +94,83 @@ Chunk 5  |  source: board_game_strategy_guide.txt#35  |  produced by: chunker.py
 ======================================================================
 If you are choosing between one more sale and one
 more delivery, deliver.
+
+
+
+## Run Log — Before
+
+| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
+|---|---|---|---|---|---|
+| 1. Retrieved chunk contains the answer | 4 of 5 | 4/5 | 4/5 | 4/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 4. System answers correctly when chunks contain the answer | 4 of 5 | 4/5 | 4/5 | 4/5 | MET |
+| 5. System admits when information is missing | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+
+---
+
+### Per-Question Breakdown
+
+| Question | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|
+| Is there a strategy note past the first game? | PASS | PASS | PASS |
+| By how much does most new players sail? | PASS | PASS | PASS |
+| Once you have contracts open, what matters more than price? | FAIL | FAIL | FAIL |
+| What is the constraint in the early game rather than position? | PASS | PASS | PASS |
+| What are the worth of crew tokens if unspent? | PASS | PASS | PASS |
+
+---
+
+### Raw Output Evidence
+
+**Criterion 2 Evidence (Source Citations):**
+* File: `generator.py` -> Function: `generate_response()`
+* Question: "What are the worth of crew tokens if unspent?" (Run 1)
+> Unspent crew tokens are worth two points each. 
+> 
+> Sources: 
+> - `board_game_strategy_guide.txt`
+> - `board_game_crew.txt`
+> - `board_game_designer_notes.txt`
+
+**Criterion 3 Evidence (Relevance Gate):**
+* File: `retrieval.py` -> Function: `check_relevance_gate()`
+> Out-of-scope questions (the gate should refuse these):
+> - Refused (best distance 0.825): What is the capital of Mongolia?
+> - Refused (best distance 0.844): How do I change the oil in a diesel engine?
+> - Refused (best distance 0.729): Who won the 1994 World Cup?
+> - Refused (best distance 0.834): What is the recommended dosage of ibuprofen for a headache?
+> - Refused (best distance 0.828): How do I write a for loop in Rust?
+> -> Gate refused 5 of 5 (Cutoff: 0.7)
+
+## Diagnoses (Milestone 3)
+
+### 1. Diagnosis for Criterion 4 Miss (Chunk Sizes with the Answer)
+* **Pipeline Stage:** **Chunking (`chunker.py`)**
+* **Mechanism:** The custom helper functions `_get_max_size_for_text` and `_split_text_by_paragraphs_and_sentences` split documents on raw line breaks without enforcing a minimum character threshold for standalone chunks. As a result, standalone document headers—such as Chunk 1 (`"What's in the cargo deck"`, 26 chars) and Chunk 2 (`"About the game"`, 14 chars)—were indexed as independent chunks. Because these header chunks contain no body text or surrounding context, they fail the >100 character threshold and provide zero semantic content to the generator during retrieval.
+
+---
+
+### 2. Diagnosis for Question 3 Failure ("Once you have contracts open, what matters more than price?")
+* **Pipeline Stage:** **Retrieval (`store.py::search` / `retrieval.py`)**
+* **Mechanism:** Semantic vector search failed to retrieve the chunk containing the answer ("Routing plan"). Because the prompt asks about an abstract tradeoff ("what matters more than price"), dense embedding similarity assigned lower scores to the specific strategy file containing the routing plan tradeoff and instead pulled top-k generic contract setup files (`board_game_contracts.txt`, `board_game_variants.txt`, `board_game_setup_variants.txt`). Because the necessary chunk was missing from the retrieved context, the generator strictly adhered to its prompt instructions and responded that it did not have enough information.
+
+### Pattern Across Misses
+
+Looking across the evaluation results, the system's failures stem from two distinct structural patterns across the pipeline rather than isolated, random errors:
+
+1. **Heading Isolation Pattern (Chunking Stage):** 
+   * **The Pattern:** The custom splitting logic isolates structural section headings (e.g., `"What's in the cargo deck"`, 26 chars; `"About the game"`, 14 chars) into standalone chunks whenever line breaks occur. 
+   * **Impact:** Because these chunks contain no trailing paragraph text or surrounding context, they continuously fail the >100 character minimum size threshold (Criterion 4 Miss) and dilute the retrieval index with zero-information vector entries.
+
+2. **Abstract Semantic Tradeoff Pattern (Retrieval Stage):** 
+   * **The Pattern:** Dense vector embeddings perform well on direct, factual lookup questions (e.g., crew token values, early game constraints, starting strategy notes), but fail when questions query abstract concepts or tradeoffs (e.g., Question 3: *"what matters more than price"*).
+   * **Impact:** Cosine distance similarity ranks general setup and rules documents higher than specific strategy files containing phrase-level tradeoffs like "routing plan." Because the crucial chunk is missing from top-k, the grounding prompt correctly forces a refusal ("I don't have enough information"), causing a failure on that question.
+
+---
+
+### Target Tightening Assessment
+
+While Criteria 1, 2, 3, and 5 were marked **MET**, cleared targets do not imply an optimal system. Specifically:
+* **Criterion 3 (Relevance Gate):** The target was set at 4 of 5 out-of-scope questions stopped, but the gate stopped 5 of 5 in every run with distances ranging from `0.729` to `0.844`. This target was set conservatively low given the clear distance gap.
+* **Tightened Target for Next Unit:** Tighten Criterion 3 to **5 of 5 (100%)** out-of-scope questions stopped, while lowering the distance cutoff threshold from `0.70` to `0.65` to test closer out-of-corpus boundary questions.
