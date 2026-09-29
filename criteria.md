@@ -25,7 +25,13 @@ contains the answer.
 **Why this target:**
 <!-- e.g. "One of my questions is about a topic only two documents mention, so
      I expect that one to be hard." -->
+Target: 4 of 5
 
+Actual Performance: 4/5, 4/5, 4/5
+
+Verdict: MET
+
+Sentence/Decision: In all three runs, exactly 4 out of 5 test questions retrieved chunks containing the target answer, consistently reaching the 4/5 target without dropping below it.
 ---
 
 ## 2. Every answer names a source
@@ -36,6 +42,13 @@ Every answer the system produces names at least one source document.
 <!-- Why all five and not four? What about your setup makes that achievable —
      or what would have to go wrong for it not to be? -->
 
+Target: 5 of 5
+
+Actual Performance: 5/5, 5/5, 5/5
+
+Verdict: MET
+
+Sentence/Decision: Every generated response across all three evaluation runs explicitly cited its source document name, satisfying the 100% attribution requirement across the board.
 ---
 
 ## 3. The relevance gate stops out-of-corpus questions
@@ -52,6 +65,14 @@ in at least 4 of 5 tries.
 **Why this target:**
 <!-- What did your distances look like when you set the cutoff in Milestone 4?
      Was there a clean gap, or did the two groups overlap? -->
+
+Target: 4 of 5
+
+Actual Performance: 5/5, 5/5, 5/5
+
+Verdict: MET
+
+Sentence/Decision: The relevance gate distance cutoff of 0.7 stopped all 5 out-of-scope questions in every run, easily surpassing the 4 of 5 target.
 
 ---
 
@@ -74,6 +95,13 @@ in at least 4 of 5 tries.
 **Why this target:**
 <!--Chunks are not headings although they have them. If answer is also found in the headings, therefore, the criterion covers both heading and paragraphs for chunks--!>
 
+Target: Chunk size must be greater than 100 characters (or headings greater than 30 characters) to contain answers- 5/5
+
+Actual Performance: 0/5, 0/5, 0/5
+
+Verdict: MISSED
+
+Why (Decision Rationale): Inspecting the generated chunks from the run log shows multiple chunks below the threshold (such as Chunk 1 at 26 characters and Chunk 2 at 14 characters) that function only as section titles without enough context to answer questions independently.
 
 ---
 
@@ -94,6 +122,13 @@ in at least 4 of 5 tries.
 **Why this target:**
 Reading the board game strategy guide can take more time but one must have finished reading it in 3 minutes following standard reading practices.
 
+Target: Reading time for the board game strategy guide is a minimum of 3 minutes - 5/5
+
+Actual Performance: 5/5, 5/5, 5/5
+
+Verdict: MET
+
+Why (Decision Rationale): The document board_game_strategy_guide.txt contains roughly 600 words, which requires approximately 2.5 to 3.5 minutes to thoroughly read and evaluate at standard adult reading speeds (200–250 wpm).
 
 ---
 
